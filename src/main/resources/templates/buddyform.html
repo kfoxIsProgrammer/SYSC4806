@@ -19,7 +19,7 @@
             </thead>
             <tbody>
             <tr th:each="buddyinfo, itemStat : *{buddyList}">
-                <td><<input th:field="*{buddyList[__${itemStat.index}__].name}" /></td>
+                <td><input th:field="*{buddyList[__${itemStat.index}__].name}" /></td>
                 <td><input th:field="*{buddyList[__${itemStat.index}__].address}" /></td>
                 <td><input th:field="*{buddyList[__${itemStat.index}__].phoneNumber}" /></td>
             </tr>

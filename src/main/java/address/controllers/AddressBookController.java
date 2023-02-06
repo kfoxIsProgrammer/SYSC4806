@@ -22,18 +22,6 @@ public class AddressBookController {
         this.buddyRepo = buddyRepo;
     }
 
-    @RequestMapping(value = "/addresslist")
-    public String getAddresses(Model model){
-        List<AddressBook> books = (List<AddressBook>) repository.findAll();
-        if(books.size()==0){
-            model.addAttribute("buddies", new AddressBook().getBuddyList());
-        }
-        else {
-            model.addAttribute("buddies", books.get(0).getBuddyList());
-        }
-       return "addresslist";
-    }
-
     @RequestMapping(value = "/")
     public String getIndex(){
         return "index";
@@ -48,6 +36,20 @@ public class AddressBookController {
         model.addAttribute("addressBook", book);
         return "buddyform";
     }
+
+
+    @RequestMapping(value = "/addresslist")
+    public String getAddresses(Model model){
+        List<AddressBook> books = (List<AddressBook>) repository.findAll();
+        if(books.size()==0){
+            model.addAttribute("buddies", new AddressBook().getBuddyList());
+        }
+        else {
+            model.addAttribute("buddies", books.get(0).getBuddyList());
+        }
+       return "addresslist";
+    }
+
 
     @PostMapping("/addbuddies")
     public String addBuddy(@ModelAttribute("addressbook") AddressBook addressBook, Model model){
