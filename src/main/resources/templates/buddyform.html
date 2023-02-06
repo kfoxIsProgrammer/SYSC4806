@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Handling Form Submission</title>
+</head>
+<body>
+<form action="#" th:action="@{/addbuddies}" th:object="${addressBook}"
+      method="post">
+    <fieldset>
+        <input type="submit" id="submitButton" th:value="Save">
+        <input type="reset" id="resetButton" name="reset" th:value="Reset"/>
+        <table>
+            <thead>
+            <tr>
+                <th> Name </th>
+                <th> Address </th>
+                <th> Phone Number</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="buddyinfo, itemStat : *{buddyList}">
+                <td><<input th:field="*{buddyList[__${itemStat.index}__].name}" /></td>
+                <td><input th:field="*{buddyList[__${itemStat.index}__].address}" /></td>
+                <td><input th:field="*{buddyList[__${itemStat.index}__].phoneNumber}" /></td>
+            </tr>
+            </tbody>
+        </table>
+    </fieldset>
+</form>
+</body>
+</html>

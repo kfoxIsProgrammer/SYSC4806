@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th> Name </th>
+        <th> Address </th>
+        <th> Phone Number </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${buddies.size() == 0}">
+        <td colspan="2"> No buddies Available </td>
+        <a href="http://localhost:8080/addbuddies?num=1">Add Buddies</a>
+    </tr>
+    <div th:if="${buddies.size() > 0}">
+    <tr th:each="buddyinfo : ${buddies}">
+        <td><span th:text="${buddyinfo.name}"> Title </span></td>
+        <td><span th:text="${buddyinfo.address}"> Author </span></td>
+        <td><span th:text="${buddyinfo.phoneNumber}"> Author </span></td>
+    </tr>
+        <a href="http://localhost:8080/deleteBuddies">Delete Buddies Form</a>
+    </div>
+    </tbody>
+</table>
+</body>
+</html>
