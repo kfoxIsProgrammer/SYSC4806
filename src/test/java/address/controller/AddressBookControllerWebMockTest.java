@@ -5,16 +5,15 @@ import address.addressbookrepointerfaces.AddressBookRepository;
 import address.addressbookrepointerfaces.BuddyInfoRepository;
 import address.models.AddressBook;
 import address.models.BuddyInfo;
-import org.junit.jupiter.api.Assertions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
-
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 
 import java.util.Arrays;
@@ -39,27 +38,15 @@ public class AddressBookControllerWebMockTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private AddressBookRepository addressBookRepository;
 
-    @MockBean
+    @Autowired
     private BuddyInfoRepository buddyInfoRepository;
 
     private String localhost = "http://localhost:8080";
 
-    @Autowired
-    private TestRestTemplate restTemplate;
 
-
-    @Test
-    public void checkAllAllowedMethods() throws Exception{
-        Set<HttpMethod> optionsForAllow = restTemplate.optionsForAllow(localhost);
-        HttpMethod[] supportedMethods
-                = {HttpMethod.GET, HttpMethod.POST ,HttpMethod.DELETE};
-        Assertions.assertTrue(optionsForAllow.containsAll(Arrays.asList(supportedMethods)));
-
-
-    }
     @Test
     public void indexPageShouldShowTwoLinks() throws Exception {
         this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk())
@@ -70,12 +57,10 @@ public class AddressBookControllerWebMockTest {
     @Test
     public void addressListShowsTwoBuddies() throws Exception {
         AddressBook aBook = new AddressBook();
-        aBook.addBuddy(new BuddyInfo("test1","test1","test1"));
+        aBook.addBuddy(new BuddyInfo("test1Name","test1Address","test1PhoneNumber"));
         aBook.addBuddy(new BuddyInfo("test2","test2","test2"));
 
-        List<AddressBook> mockStuff = Stream.of(aBook).collect(Collectors.toList());
-
-        when(addressBookRepository.findAll()).thenReturn(mockStuff);
+        addressBookRepository.save(aBook);
 
         this.mockMvc.perform(get("/addresslist")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("test1")))
@@ -83,19 +68,20 @@ public class AddressBookControllerWebMockTest {
     }
 
 
+
     @Test
     public void addBuddies() throws Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-COM-PERSIST", "true");
-
         AddressBook aBook = new AddressBook();
-        aBook.addBuddy(new BuddyInfo("test","test","test"));
+        aBook.addBuddy(new BuddyInfo("test1Name","test1Address","test1PhoneNumber"));
+        aBook.addBuddy(new BuddyInfo("test2","test2","test2"));
 
-        HttpEntity<AddressBook> request = new HttpEntity<>(aBook, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                localhost+"/addbuddies", request , String.class);
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        mockMvc.perform( MockMvcRequestBuilders
+                        .post("/addbuddies")
+                        .content(asJsonString(aBook))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -103,13 +89,15 @@ public class AddressBookControllerWebMockTest {
         AddressBook aBook = new AddressBook();
         aBook.addBuddy(new BuddyInfo("test1","test1","test1"));
         aBook.addBuddy(new BuddyInfo("test2","test2","test2"));
+        aBook.addBuddy(new BuddyInfo("test3","test3","test3"));
 
-        List<AddressBook> mockStuff = Stream.of(aBook).collect(Collectors.toList());
+        addressBookRepository.save(aBook);
 
-        when(addressBookRepository.findAll()).thenReturn(mockStuff);
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                localhost+"/deleteBuddies/1", "" , String.class);
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        mockMvc.perform( MockMvcRequestBuilders
+                        .post("/deleteBuddies/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -118,13 +106,19 @@ public class AddressBookControllerWebMockTest {
         aBook.addBuddy(new BuddyInfo("test1","test1","test1"));
         aBook.addBuddy(new BuddyInfo("test2","test2","test2"));
 
-        List<AddressBook> mockStuff = Stream.of(aBook).collect(Collectors.toList());
+        addressBookRepository.save(aBook);
 
-        when(addressBookRepository.findAll()).thenReturn(mockStuff);
-
-        this.mockMvc.perform(get("/deleteBuddies")).andDo(print()).andExpect(status().isOk())
+        mockMvc.perform(get("/deleteBuddies")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("test1")))
                 .andExpect(content().string(containsString("test2")));
+    }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

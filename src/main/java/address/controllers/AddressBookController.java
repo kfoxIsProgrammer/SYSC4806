@@ -53,6 +53,7 @@ public class AddressBookController {
 
     @PostMapping("/addbuddies")
     public String addBuddy(@ModelAttribute("addressbook") AddressBook addressBook, Model model){
+        System.out.println(addressBook.toString());
         AddressBook currentBook;
         if(repository.count() == 0){
             currentBook = addressBook;
